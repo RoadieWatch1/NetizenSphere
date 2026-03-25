@@ -30,8 +30,10 @@ namespace NetizenSphere.Player
                 }
             }
 
-            transform.position = target.position + offset;
+            Vector3 newPos = target.position + offset;
+            transform.position = newPos;
             transform.LookAt(target);
+            Debug.Log($"CameraFollow LateUpdate — target:{target.position} cam:{transform.position}");
         }
     }
 }
