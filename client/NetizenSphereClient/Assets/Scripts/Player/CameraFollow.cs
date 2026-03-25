@@ -11,7 +11,6 @@ namespace NetizenSphere.Player
         public void SetTarget(Transform newTarget)
         {
             target = newTarget;
-            Debug.Log("CameraFollow: target set to " + newTarget.name);
         }
 
         private void LateUpdate()
@@ -30,10 +29,8 @@ namespace NetizenSphere.Player
                 }
             }
 
-            Vector3 newPos = target.position + offset;
-            transform.position = newPos;
+            transform.position = Vector3.Lerp(transform.position, target.position + offset, smoothSpeed * Time.deltaTime);
             transform.LookAt(target);
-            Debug.Log($"CameraFollow LateUpdate — target:{target.position} cam:{transform.position}");
         }
     }
 }
