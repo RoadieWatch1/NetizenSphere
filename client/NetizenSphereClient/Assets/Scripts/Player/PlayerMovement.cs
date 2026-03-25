@@ -1,10 +1,11 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Unity.Netcode;
 
 namespace NetizenSphere.Player
 {
     [RequireComponent(typeof(CharacterController))]
-    public class PlayerMovement : MonoBehaviour
+    public class PlayerMovement : NetworkBehaviour
     {
         [Header("Movement")]
         [SerializeField] private float moveSpeed = 5f;
@@ -29,24 +30,35 @@ namespace NetizenSphere.Player
             _playerControls = new PlayerControls();
         }
 
-        private void OnEnable()
+        public override void OnNetworkSpawn()
         {
-            _playerControls.Enable();
-            _playerControls.Player.Move.performed += OnMovePerformed;
-            _playerControls.Player.Move.canceled += OnMoveCanceled;
-            _playerControls.Player.Jump.performed += OnJumpPerformed;
+            if (IsOwner)
+            {
+                _playerControls.Enable();
+                _playerControls.Player.Move.performed += OnMovePerformed;
+                _playerControls.Player.Move.canceled += OnMoveCanceled;
+                _playerControls.Player.Jump.performed += OnJumpPerformed;
+            }
         }
 
-        private void OnDisable()
+        public override void OnNetworkDespawn()
         {
-            _playerControls.Player.Move.performed -= OnMovePerformed;
-            _playerControls.Player.Move.canceled -= OnMoveCanceled;
-            _playerControls.Player.Jump.performed -= OnJumpPerformed;
-            _playerControls.Disable();
+            if (IsOwner)
+            {
+                _playerControls.Player.Move.performed -= OnMovePerformed;
+                _playerControls.Player.Move.canceled -= OnMoveCanceled;
+                _playerControls.Player.Jump.performed -= OnJumpPerformed;
+                _playerControls.Disable();
+            }
         }
 
         private void Update()
         {
+            if (!IsSpawned || !IsOwner)
+            {
+                return;
+            }
+
             HandleGroundCheck();
             HandleMovement();
             HandleGravity();
@@ -82,17 +94,27 @@ namespace NetizenSphere.Player
 
         private void OnMovePerformed(InputAction.CallbackContext context)
         {
+            if (!IsOwner)
+            {
+                return;
+            }
+
             _moveInput = context.ReadValue<Vector2>();
         }
 
         private void OnMoveCanceled(InputAction.CallbackContext context)
         {
+            if (!IsOwner)
+            {
+                return;
+            }
+
             _moveInput = Vector2.zero;
         }
 
         private void OnJumpPerformed(InputAction.CallbackContext context)
         {
-            if (!_isGrounded)
+            if (!IsOwner || !_isGrounded)
             {
                 return;
             }
