@@ -32,12 +32,20 @@ namespace NetizenSphere.Player
 
         public override void OnNetworkSpawn()
         {
-            if (IsOwner)
+            if (!IsOwner)
+                return;
+
+            _playerControls.Enable();
+            _playerControls.Player.Move.performed += OnMovePerformed;
+            _playerControls.Player.Move.canceled += OnMoveCanceled;
+            _playerControls.Player.Jump.performed += OnJumpPerformed;
+
+            if (Camera.main != null)
             {
-                _playerControls.Enable();
-                _playerControls.Player.Move.performed += OnMovePerformed;
-                _playerControls.Player.Move.canceled += OnMoveCanceled;
-                _playerControls.Player.Jump.performed += OnJumpPerformed;
+                CameraFollow cameraFollow = Camera.main.GetComponent<CameraFollow>();
+                if (cameraFollow == null)
+                    cameraFollow = Camera.main.gameObject.AddComponent<CameraFollow>();
+                cameraFollow.SetTarget(transform);
             }
         }
 

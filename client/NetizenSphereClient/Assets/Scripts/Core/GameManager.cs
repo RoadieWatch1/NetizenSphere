@@ -1,5 +1,5 @@
+using Unity.Netcode;
 using UnityEngine;
-using NetizenSphere.Player;
 
 namespace NetizenSphere.Core
 {
@@ -10,8 +10,6 @@ namespace NetizenSphere.Core
         [Header("Player")]
         [SerializeField] private GameObject playerPrefab;
         [SerializeField] private Transform spawnPoint;
-
-        private GameObject _spawnedPlayer;
 
         private void Awake()
         {
@@ -27,11 +25,20 @@ namespace NetizenSphere.Core
 
         private void Start()
         {
-            SpawnLocalPlayer();
+            NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
         }
 
-        public void SpawnLocalPlayer()
+        private void OnDestroy()
         {
+            if (NetworkManager.Singleton != null)
+                NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
+        }
+
+        private void OnClientConnected(ulong clientId)
+        {
+            if (!NetworkManager.Singleton.IsServer)
+                return;
+
             if (playerPrefab == null)
             {
                 Debug.LogError("GameManager: playerPrefab is not assigned.", this);
@@ -39,20 +46,11 @@ namespace NetizenSphere.Core
             }
 
             Vector3 position = spawnPoint != null ? spawnPoint.position : new Vector3(0f, 1f, 0f);
-            _spawnedPlayer = Instantiate(playerPrefab, position, Quaternion.identity);
-            _spawnedPlayer.name = "LocalPlayer";
+            GameObject player = Instantiate(playerPrefab, position, Quaternion.identity);
+            NetworkObject networkObject = player.GetComponent<NetworkObject>();
+            networkObject.SpawnAsPlayerObject(clientId, true);
 
-            if (Camera.main != null)
-            {
-                CameraFollow cameraFollow = Camera.main.GetComponent<CameraFollow>();
-                if (cameraFollow == null)
-                    cameraFollow = Camera.main.gameObject.AddComponent<CameraFollow>();
-                cameraFollow.SetTarget(_spawnedPlayer.transform);
-            }
-
-            Debug.Log("GameManager: Local player spawned.");
+            Debug.Log($"GameManager: Spawned player for client {clientId}.");
         }
-
-        public GameObject GetLocalPlayer() => _spawnedPlayer;
     }
 }

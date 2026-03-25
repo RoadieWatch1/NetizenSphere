@@ -16,18 +16,7 @@ namespace NetizenSphere.Player
         private void LateUpdate()
         {
             if (target == null)
-            {
-                PlayerMovement player = FindAnyObjectByType<PlayerMovement>();
-                if (player != null)
-                {
-                    target = player.transform;
-                    Debug.Log("CameraFollow: auto-found player.");
-                }
-                else
-                {
-                    return;
-                }
-            }
+                return;
 
             transform.position = Vector3.Lerp(transform.position, target.position + offset, smoothSpeed * Time.deltaTime);
             transform.LookAt(target);
