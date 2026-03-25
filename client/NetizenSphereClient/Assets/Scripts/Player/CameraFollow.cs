@@ -8,6 +8,16 @@ namespace NetizenSphere.Player
         [SerializeField] private Vector3 offset = new Vector3(0f, 6f, -8f);
         [SerializeField] private float smoothSpeed = 8f;
 
+        private void Start()
+        {
+            if (target == null)
+            {
+                GameObject found = GameObject.FindWithTag("Player");
+                if (found != null)
+                    target = found.transform;
+            }
+        }
+
         public void SetTarget(Transform newTarget)
         {
             target = newTarget;
