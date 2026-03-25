@@ -42,9 +42,13 @@ namespace NetizenSphere.Core
             _spawnedPlayer = Instantiate(playerPrefab, position, Quaternion.identity);
             _spawnedPlayer.name = "LocalPlayer";
 
-            CameraFollow cameraFollow = Camera.main?.GetComponent<CameraFollow>();
-            if (cameraFollow != null)
+            if (Camera.main != null)
+            {
+                CameraFollow cameraFollow = Camera.main.GetComponent<CameraFollow>();
+                if (cameraFollow == null)
+                    cameraFollow = Camera.main.gameObject.AddComponent<CameraFollow>();
                 cameraFollow.SetTarget(_spawnedPlayer.transform);
+            }
 
             Debug.Log("GameManager: Local player spawned.");
         }
