@@ -8,6 +8,11 @@ namespace NetizenSphere.Player
         [SerializeField] private Vector3 offset = new Vector3(0f, 6f, -8f);
         [SerializeField] private float smoothSpeed = 8f;
 
+        public void SetTarget(Transform newTarget)
+        {
+            target = newTarget;
+        }
+
         private void LateUpdate()
         {
             if (target == null)

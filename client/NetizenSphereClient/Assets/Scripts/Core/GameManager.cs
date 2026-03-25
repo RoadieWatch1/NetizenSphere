@@ -1,4 +1,5 @@
 using UnityEngine;
+using NetizenSphere.Player;
 
 namespace NetizenSphere.Core
 {
@@ -40,6 +41,10 @@ namespace NetizenSphere.Core
             Vector3 position = spawnPoint != null ? spawnPoint.position : new Vector3(0f, 1f, 0f);
             _spawnedPlayer = Instantiate(playerPrefab, position, Quaternion.identity);
             _spawnedPlayer.name = "LocalPlayer";
+
+            CameraFollow cameraFollow = Camera.main?.GetComponent<CameraFollow>();
+            if (cameraFollow != null)
+                cameraFollow.SetTarget(_spawnedPlayer.transform);
 
             Debug.Log("GameManager: Local player spawned.");
         }
