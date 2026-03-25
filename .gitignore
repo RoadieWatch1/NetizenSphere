@@ -1,0 +1,16 @@
+# Unity
+client/NetizenSphereClient/Library/
+client/NetizenSphereClient/Temp/
+client/NetizenSphereClient/Logs/
+client/NetizenSphereClient/obj/
+client/NetizenSphereClient/Build/
+client/NetizenSphereClient/Builds/
+client/NetizenSphereClient/.vs/
+client/NetizenSphereClient/UserSettings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
