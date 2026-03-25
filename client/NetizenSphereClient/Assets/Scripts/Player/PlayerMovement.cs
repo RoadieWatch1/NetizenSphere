@@ -33,7 +33,12 @@ namespace NetizenSphere.Player
         public override void OnNetworkSpawn()
         {
             if (!IsOwner)
+            {
+                // Non-owners are positioned by NetworkTransform — CharacterController
+                // would resist those position updates, so disable it.
+                _characterController.enabled = false;
                 return;
+            }
 
             _playerControls.Enable();
             _playerControls.Player.Move.performed += OnMovePerformed;
