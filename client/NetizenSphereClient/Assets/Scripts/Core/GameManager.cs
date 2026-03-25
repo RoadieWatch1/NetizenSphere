@@ -44,10 +44,19 @@ namespace NetizenSphere.Core
 
             if (Camera.main != null)
             {
+                Debug.Log("GameManager: Camera.main found — " + Camera.main.gameObject.name);
                 CameraFollow cameraFollow = Camera.main.GetComponent<CameraFollow>();
                 if (cameraFollow == null)
+                {
+                    Debug.Log("GameManager: Adding CameraFollow component.");
                     cameraFollow = Camera.main.gameObject.AddComponent<CameraFollow>();
+                }
                 cameraFollow.SetTarget(_spawnedPlayer.transform);
+                Debug.Log("GameManager: CameraFollow target set to " + _spawnedPlayer.name);
+            }
+            else
+            {
+                Debug.LogError("GameManager: Camera.main is NULL — Main Camera tag missing?");
             }
 
             Debug.Log("GameManager: Local player spawned.");
