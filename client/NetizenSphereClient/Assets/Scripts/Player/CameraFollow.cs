@@ -17,7 +17,11 @@ namespace NetizenSphere.Player
         {
             if (target == null)
             {
-                return;
+                GameObject found = GameObject.FindWithTag("Player");
+                if (found != null)
+                    target = found.transform;
+                else
+                    return;
             }
 
             Vector3 desiredPosition = target.position + offset;
