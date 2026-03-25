@@ -9,6 +9,7 @@ namespace NetizenSphere.Core
 
         [Header("Player")]
         [SerializeField] private GameObject playerPrefab;
+        [SerializeField] private Transform spawnPoint;
 
         private void Awake()
         {
@@ -26,16 +27,39 @@ namespace NetizenSphere.Core
         {
             if (playerPrefab == null)
             {
-                Debug.LogError("GameManager: playerPrefab is not assigned.", this);
+                Debug.LogError("GameManager: playerPrefab is NOT assigned — drag Player prefab onto GameManager in Inspector.", this);
                 return;
             }
 
-            // Assign the player prefab to NGO's NetworkConfig so auto-spawn works.
-            // The PlayerPrefab YAML field sits inside NetworkConfig, which we cannot
-            // reliably hand-edit; setting it here in code is the safe path.
-            NetworkManager.Singleton.NetworkConfig.PlayerPrefab = playerPrefab;
+            Debug.Log("GameManager: playerPrefab is assigned. Waiting for network start.");
+            NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+        }
 
-            Debug.Log("GameManager: PlayerPrefab assigned to NetworkConfig.");
+        private void OnDestroy()
+        {
+            if (NetworkManager.Singleton != null)
+                NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
+        }
+
+        private void OnClientConnected(ulong clientId)
+        {
+            if (!NetworkManager.Singleton.IsServer)
+                return;
+
+            Debug.Log($"GameManager: Client {clientId} connected. Spawning player.");
+
+            Vector3 position = spawnPoint != null ? spawnPoint.position : new Vector3(0f, 1f, 0f);
+            GameObject player = Instantiate(playerPrefab, position, Quaternion.identity);
+            NetworkObject netObj = player.GetComponent<NetworkObject>();
+
+            if (netObj == null)
+            {
+                Debug.LogError("GameManager: Player prefab is missing a NetworkObject component!", this);
+                return;
+            }
+
+            netObj.SpawnAsPlayerObject(clientId, true);
+            Debug.Log($"GameManager: Player spawned for client {clientId}.");
         }
     }
 }
