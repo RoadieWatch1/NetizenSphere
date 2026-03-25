@@ -18,7 +18,7 @@ namespace NetizenSphere.Player
         {
             if (target == null)
             {
-                PlayerMovement player = FindFirstObjectByType<PlayerMovement>();
+                PlayerMovement player = FindAnyObjectByType<PlayerMovement>();
                 if (player != null)
                 {
                     target = player.transform;
