@@ -61,8 +61,13 @@ namespace NetizenSphere.Player
                 _playerControls.Player.Move.performed -= OnMovePerformed;
                 _playerControls.Player.Move.canceled -= OnMoveCanceled;
                 _playerControls.Player.Jump.performed -= OnJumpPerformed;
-                _playerControls.Disable();
             }
+        }
+
+        private void OnDestroy()
+        {
+            _playerControls.Disable();
+            _playerControls.Dispose();
         }
 
         private void Update()
