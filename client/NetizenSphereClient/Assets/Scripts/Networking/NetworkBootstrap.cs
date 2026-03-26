@@ -6,10 +6,10 @@ namespace NetizenSphere.Networking
 {
     public class NetworkBootstrap : MonoBehaviour
     {
+        private string _nameInput = "";
+
         private void Awake()
         {
-            // Wire up the transport to NetworkConfig in code — hand-written scene
-            // YAML cannot reliably reach inside the nested NetworkConfig object.
             var transport = GetComponent<UnityTransport>();
             if (transport == null)
             {
@@ -18,7 +18,8 @@ namespace NetizenSphere.Networking
             }
 
             NetworkManager.Singleton.NetworkConfig.NetworkTransport = transport;
-            Debug.Log("NetworkBootstrap: UnityTransport assigned to NetworkConfig.");
+
+            _nameInput = PlayerPrefs.GetString("DisplayName", "");
         }
 
         private void OnGUI()
@@ -26,18 +27,30 @@ namespace NetizenSphere.Networking
             if (NetworkManager.Singleton == null)
                 return;
 
-            GUILayout.BeginArea(new Rect(10, 10, 200, 100));
+            GUILayout.BeginArea(new Rect(10, 10, 220, 140));
 
             if (!NetworkManager.Singleton.IsClient && !NetworkManager.Singleton.IsServer)
             {
+                GUILayout.Label("Display Name:");
+                _nameInput = GUILayout.TextField(_nameInput, 24, GUILayout.Width(200));
+
                 if (GUILayout.Button("Host"))
+                {
+                    SaveName();
                     NetworkManager.Singleton.StartHost();
+                }
 
                 if (GUILayout.Button("Client"))
+                {
+                    SaveName();
                     NetworkManager.Singleton.StartClient();
+                }
 
                 if (GUILayout.Button("Server"))
+                {
+                    SaveName();
                     NetworkManager.Singleton.StartServer();
+                }
             }
             else
             {
@@ -47,6 +60,16 @@ namespace NetizenSphere.Networking
             }
 
             GUILayout.EndArea();
+        }
+
+        private void SaveName()
+        {
+            string name = _nameInput.Trim();
+            if (string.IsNullOrWhiteSpace(name))
+                return;
+
+            PlayerPrefs.SetString("DisplayName", name);
+            PlayerPrefs.Save();
         }
     }
 }
