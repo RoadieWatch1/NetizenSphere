@@ -37,6 +37,11 @@ namespace NetizenSphere.Core
             if (_playerPrefab == null)
                 return;
 
+            // Register with NGO on both host and client so the prefab hash is
+            // recognized when the host sends a spawn message to connecting clients.
+            NetworkManager.Singleton.NetworkConfig.Prefabs.Add(
+                new NetworkPrefab { Prefab = _playerPrefab });
+
             NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
         }
 
