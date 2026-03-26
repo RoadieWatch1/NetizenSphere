@@ -4,11 +4,18 @@ namespace NetizenSphere.Player
 {
     public class PlayerAvatar : MonoBehaviour
     {
+        [SerializeField] private RuntimeAnimatorController _animatorController;
+
         private Animator _animator;
 
         private void Awake()
         {
             _animator = GetComponent<Animator>();
+
+            // Assign controller via code — more reliable than the serialized YAML
+            // reference on the Animator component itself.
+            if (_animatorController != null)
+                _animator.runtimeAnimatorController = _animatorController;
 
             // Ch20 (and any imported FBX model) ships with its own Animator component.
             // That child Animator has no controller and takes priority over AvatarVisual's
