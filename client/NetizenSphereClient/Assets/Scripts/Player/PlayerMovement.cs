@@ -71,6 +71,10 @@ namespace NetizenSphere.Player
             base.OnDestroy();
         }
 
+        public Vector3 GetVelocity() => _characterController.velocity;
+
+        public bool IsGrounded() => _isGrounded;
+
         private void Update()
         {
             if (!IsSpawned || !IsOwner)
