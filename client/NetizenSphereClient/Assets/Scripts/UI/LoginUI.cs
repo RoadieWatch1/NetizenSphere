@@ -1,5 +1,4 @@
 using NetizenSphere.Services;
-using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -7,64 +6,60 @@ namespace NetizenSphere.UI
 {
     public class LoginUI : MonoBehaviour
     {
-        [SerializeField] private TMP_InputField nameInput;
-        [SerializeField] private TMP_Text errorText;
         [SerializeField] private string bootSceneName = "Boot";
+
+        private string _nameInput = "";
+        private string _error = "";
 
         private void Start()
         {
             if (SessionManager.Instance != null && SessionManager.Instance.IsSignedIn)
-            {
-                nameInput.text = SessionManager.Instance.DisplayName;
-            }
-
-            if (errorText != null)
-            {
-                errorText.text = string.Empty;
-            }
+                _nameInput = SessionManager.Instance.DisplayName;
         }
 
-        public void OnContinuePressed()
+        private void OnGUI()
         {
-            if (nameInput == null)
+            float w = 300f;
+            float x = (Screen.width - w) / 2f;
+            float y = Screen.height / 2f - 60f;
+
+            GUILayout.BeginArea(new Rect(x, y, w, 160f));
+            GUILayout.Label("Display Name:");
+            _nameInput = GUILayout.TextField(_nameInput, 24, GUILayout.Width(280f));
+
+            if (!string.IsNullOrEmpty(_error))
+                GUILayout.Label(_error);
+
+            if (GUILayout.Button("Enter World", GUILayout.Width(280f), GUILayout.Height(40f)))
+                TryContinue();
+
+            GUILayout.EndArea();
+        }
+
+        private void TryContinue()
+        {
+            string name = _nameInput.Trim();
+
+            if (string.IsNullOrWhiteSpace(name))
             {
-                Debug.LogError("Name input is not assigned.", this);
+                _error = "Please enter a display name.";
                 return;
             }
 
-            string enteredName = nameInput.text.Trim();
-
-            if (string.IsNullOrWhiteSpace(enteredName))
-            {
-                ShowError("Please enter a display name.");
-                return;
-            }
-
-            if (enteredName.Length > 24)
-            {
-                enteredName = enteredName.Substring(0, 24);
-            }
+            if (name.Length > 24)
+                name = name.Substring(0, 24);
 
             if (SessionManager.Instance == null)
             {
-                ShowError("Session manager not found.");
+                _error = "Session manager not found.";
                 return;
             }
 
-            SessionManager.Instance.SignIn(enteredName);
+            SessionManager.Instance.SignIn(name);
             SceneManager.LoadScene(bootSceneName);
         }
 
-        private void ShowError(string message)
-        {
-            if (errorText != null)
-            {
-                errorText.text = message;
-            }
-            else
-            {
-                Debug.LogWarning(message, this);
-            }
-        }
+        // Called by ContinueButton in scene if still wired
+        public void OnContinuePressed() => TryContinue();
     }
 }

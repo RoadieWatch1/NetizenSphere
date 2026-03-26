@@ -1003,13 +1003,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::NetizenSphere.UI.LoginUI
-  nameInput: {fileID: 1000000044}
-  errorText: {fileID: 1000000083}
   bootSceneName: Boot
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 1000000091}
   - {fileID: 1000000002}
   - {fileID: 1000000011}
   - {fileID: 1000000021}
