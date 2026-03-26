@@ -8,9 +8,17 @@ namespace NetizenSphere.Player
 
         private void Awake()
         {
-            // Search self first, then children — supports Animator on AvatarVisual
-            // OR on the humanoid model root when it's parented under AvatarVisual.
-            _animator = GetComponent<Animator>() ?? GetComponentInChildren<Animator>(true);
+            _animator = GetComponent<Animator>();
+
+            // Ch20 (and any imported FBX model) ships with its own Animator component.
+            // That child Animator has no controller and takes priority over AvatarVisual's
+            // Animator for its own bones, causing a permanent T-pose. Disable all child
+            // Animators so only the one on this GameObject (AvatarVisual) drives the rig.
+            foreach (var child in GetComponentsInChildren<Animator>(true))
+            {
+                if (child.gameObject != gameObject)
+                    child.enabled = false;
+            }
         }
 
         public void SetSpeed(float speed)
