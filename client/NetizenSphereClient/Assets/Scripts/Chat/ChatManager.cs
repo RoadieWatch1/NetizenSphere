@@ -99,7 +99,7 @@ namespace NetizenSphere.Chat
 
             while (elapsed < Timeout)
             {
-                var identities = FindObjectsByType<PlayerIdentity>(FindObjectsSortMode.None);
+                var identities = FindObjectsByType<PlayerIdentity>();
                 foreach (var id in identities)
                 {
                     if (!id.IsSpawned || id.OwnerClientId != clientId) continue;

@@ -106,7 +106,7 @@ namespace NetizenSphere.Social
         {
             _roster.Clear();
 
-            var identities = FindObjectsByType<PlayerIdentity>(FindObjectsSortMode.None);
+            var identities = FindObjectsByType<PlayerIdentity>();
 
             foreach (var identity in identities)
             {
