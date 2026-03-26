@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1111111111111112}
   - component: {fileID: 1111111111111116}
+  - component: {fileID: 5865062895582257485}
   m_Layer: 0
   m_Name: AvatarVisual
   m_TagString: Untagged
@@ -30,7 +31,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 4720734083072791213}
+  - {fileID: 5833440885007980860}
   m_Father: {fileID: 7364829103847561002}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1111111111111116
@@ -43,8 +44,30 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 75b7d599d6dbd4a22aea8a0fa3b90c47, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetizenSphere.Player.PlayerAvatar
+--- !u!95 &5865062895582257485
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1111111111111111}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: 8837f192a88abd84da9f1907d0b6bdb4, type: 3}
+  m_Controller: {fileID: 9100000, guid: c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &7364829103847561001
 GameObject:
   m_ObjectHideFlags: 0
@@ -295,7 +318,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetizenSphere.Player.PlayerAnimator
 --- !u!114 &6688888888888888
 MonoBehaviour:
@@ -307,9 +330,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e8d0727d5ae3244e3b569694d3912374, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Components::Unity.Netcode.Components.NetworkAnimator
-  m_Animator: {fileID: 5577777777777777}
+  ShowTopMostFoldoutHeaderGroup: 1
+  TransitionStateInfoList: []
+  m_Animator: {fileID: 5865062895582257485}
 --- !u!1 &7364829103847561007
 GameObject:
   m_ObjectHideFlags: 0
@@ -341,7 +366,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 7364829103847561002}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &4720734083072919593
+--- !u!1001 &5833440885007844280
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -393,30 +418,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 9500000, guid: 8837f192a88abd84da9f1907d0b6bdb4, type: 3}
-      propertyPath: m_Controller
-      value:
-      objectReference: {fileID: 9100000, guid: c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6, type: 3}
-    - target: {fileID: 9500000, guid: 8837f192a88abd84da9f1907d0b6bdb4, type: 3}
-      propertyPath: m_Avatar
-      value:
-      objectReference: {fileID: 9000000, guid: 8837f192a88abd84da9f1907d0b6bdb4, type: 3}
-    - target: {fileID: 9500000, guid: 8837f192a88abd84da9f1907d0b6bdb4, type: 3}
-      propertyPath: m_ApplyRootMotion
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 9500000, guid: 8837f192a88abd84da9f1907d0b6bdb4, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8837f192a88abd84da9f1907d0b6bdb4, type: 3}
---- !u!95 &5577777777777777 stripped
-Animator:
-  m_CorrespondingSourceObject: {fileID: 9500000, guid: 8837f192a88abd84da9f1907d0b6bdb4, type: 3}
-  m_PrefabInstance: {fileID: 4720734083072919593}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &4720734083072791213 stripped
+--- !u!4 &5833440885007980860 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400004, guid: 8837f192a88abd84da9f1907d0b6bdb4, type: 3}
-  m_PrefabInstance: {fileID: 4720734083072919593}
+  m_PrefabInstance: {fileID: 5833440885007844280}
   m_PrefabAsset: {fileID: 0}
