@@ -134,6 +134,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   m_text: Netizen
   m_isRightToLeft: 0
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSize: 36
   m_fontSizeBase: 36
   m_fontColor: {r: 1, g: 1, b: 1, a: 1}
