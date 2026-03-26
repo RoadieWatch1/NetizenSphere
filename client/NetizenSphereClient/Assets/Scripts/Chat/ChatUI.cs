@@ -7,8 +7,8 @@ namespace NetizenSphere.Chat
     {
         // ── Layout ────────────────────────────────────────────────────────────────
 
-        private const float PanelWidth   = 360f;
-        private const float MsgAreaH     = 200f;  // scroll area height
+        private const float PanelWidth   = 180f;
+        private const float MsgAreaH     = 100f;  // scroll area height
         private const float HeaderH      = 22f;
         private const float InputH       = 30f;
         private const float Margin       = 10f;

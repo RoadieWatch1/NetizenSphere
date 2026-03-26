@@ -1,0 +1,129 @@
+using System.Threading.Tasks;
+using NetizenSphere.Data;
+using UnityEngine;
+
+namespace NetizenSphere.Services
+{
+    /// <summary>
+    /// Loads or creates a Supabase profile after auth completes.
+    /// Caches the active profile at runtime and feeds DisplayName into SessionManager
+    /// so all existing Phase 2 identity code continues to work unchanged.
+    /// </summary>
+    public class ProfileManager : MonoBehaviour
+    {
+        public static ProfileManager Instance { get; private set; }
+
+        public UserProfile ActiveProfile { get; private set; }
+
+        // ── Lifecycle ─────────────────────────────────────────────────────────────
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void Bootstrap()
+        {
+            if (Instance != null) return;
+            var go = new GameObject("ProfileManager");
+            DontDestroyOnLoad(go);
+            go.AddComponent<ProfileManager>();
+        }
+
+        private void Awake()
+        {
+            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+
+        // ── Public API ────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Fetches the profile for <paramref name="userId"/> from Supabase.
+        /// If no profile exists, creates one with <paramref name="fallbackDisplayName"/>.
+        /// Feeds the resulting display name into SessionManager so Phase 2 code
+        /// picks it up automatically.
+        /// </summary>
+        public async Task<bool> LoadOrCreateProfileAsync(string userId, string fallbackDisplayName)
+        {
+            Debug.Log($"[ProfileManager] Loading profile for userId={userId}");
+
+            UserProfile profile = await BackendClient.Instance.GetProfileAsync(userId);
+
+            if (profile == null)
+            {
+                Debug.Log("[ProfileManager] No existing profile — creating new one.");
+                string name = SanitizeName(fallbackDisplayName, userId);
+                profile = await BackendClient.Instance.CreateProfileAsync(new UserProfile
+                {
+                    UserId             = userId,
+                    DisplayName        = name,
+                    AvatarPrimaryColor = "#00FFFF",
+                    AvatarAccentColor  = "#FFFFFF",
+                    AvatarPreset       = null
+                });
+            }
+
+            if (profile == null)
+            {
+                Debug.LogError("[ProfileManager] Failed to load or create profile — check BackendClient logs above for HTTP response details.");
+                return false;
+            }
+
+            Debug.Log($"[ProfileManager] Profile ready: {profile.DisplayName}");
+
+            ActiveProfile = profile;
+
+            // Feed name into existing Phase 2 identity chain —
+            // PlayerIdentity, ChatUI, and PlayerPresenceManager all read from here.
+            SessionManager.Instance.SignIn(profile.DisplayName);
+
+            // Fire-and-forget last login timestamp update
+            _ = BackendClient.Instance.UpdateLastLoginAsync(userId);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Updates the display name on the backend and keeps SessionManager in sync.
+        /// </summary>
+        public async Task<bool> UpdateDisplayNameAsync(string newName)
+        {
+            if (ActiveProfile == null) return false;
+
+            string sanitized = SanitizeName(newName, ActiveProfile.UserId);
+            bool ok = await BackendClient.Instance.UpdateDisplayNameAsync(ActiveProfile.UserId, sanitized);
+            if (!ok) return false;
+
+            ActiveProfile.DisplayName = sanitized;
+            SessionManager.Instance.SignIn(sanitized);
+            return true;
+        }
+
+        /// <summary>
+        /// Updates avatar customization fields on the backend and in the local cache.
+        /// </summary>
+        public async Task<bool> UpdateAvatarAsync(string primaryColor, string accentColor, string preset)
+        {
+            if (ActiveProfile == null) return false;
+
+            bool ok = await BackendClient.Instance.UpdateAvatarAsync(
+                ActiveProfile.UserId, primaryColor, accentColor, preset);
+
+            if (!ok) return false;
+
+            ActiveProfile.AvatarPrimaryColor = primaryColor;
+            ActiveProfile.AvatarAccentColor  = accentColor;
+            ActiveProfile.AvatarPreset        = preset;
+            return true;
+        }
+
+        // ── Helpers ───────────────────────────────────────────────────────────────
+
+        private static string SanitizeName(string name, string userId)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return "Netizen_" + userId.Substring(0, Mathf.Min(4, userId.Length));
+
+            name = name.Trim();
+            return name.Length > 24 ? name.Substring(0, 24) : name;
+        }
+    }
+}
