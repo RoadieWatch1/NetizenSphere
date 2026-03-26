@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1111111111111112}
   - component: {fileID: 1111111111111116}
   - component: {fileID: 5865062895582257485}
+  - component: {fileID: 6688888888888888}
   m_Layer: 0
   m_Name: AvatarVisual
   m_TagString: Untagged
@@ -83,7 +84,6 @@ GameObject:
   - component: {fileID: 7364829103847561010}
   - component: {fileID: 7364829103847561011}
   - component: {fileID: 1111111111111117}
-  - component: {fileID: 6688888888888888}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -326,7 +326,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7364829103847561001}
+  m_GameObject: {fileID: 1111111111111111}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e8d0727d5ae3244e3b569694d3912374, type: 3}
