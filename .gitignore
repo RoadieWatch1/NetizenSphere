@@ -8,6 +8,9 @@ client/NetizenSphereClient/Builds/
 client/NetizenSphereClient/.vs/
 client/NetizenSphereClient/UserSettings/
 
+# Build outputs
+builds/
+
 # OS
 .DS_Store
 Thumbs.db
