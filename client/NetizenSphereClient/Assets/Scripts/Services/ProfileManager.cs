@@ -43,14 +43,18 @@ namespace NetizenSphere.Services
         /// </summary>
         public async Task<bool> LoadOrCreateProfileAsync(string userId, string fallbackDisplayName)
         {
-            Debug.Log($"[ProfileManager] Loading profile for userId={userId}");
-
+            Debug.Log($"[ProfileManager] Step 1 — GET profile for userId={userId}");
             UserProfile profile = await BackendClient.Instance.GetProfileAsync(userId);
 
-            if (profile == null)
+            if (profile != null)
             {
-                Debug.Log("[ProfileManager] No existing profile — creating new one.");
+                Debug.Log($"[ProfileManager] Step 1 result — profile found: {profile.DisplayName}");
+            }
+            else
+            {
+                Debug.Log("[ProfileManager] Step 1 result — no profile found, will create.");
                 string name = SanitizeName(fallbackDisplayName, userId);
+                Debug.Log($"[ProfileManager] Step 2 — POST create profile with name={name}");
                 profile = await BackendClient.Instance.CreateProfileAsync(new UserProfile
                 {
                     UserId             = userId,
@@ -59,23 +63,24 @@ namespace NetizenSphere.Services
                     AvatarAccentColor  = "#FFFFFF",
                     AvatarPreset       = null
                 });
+
+                if (profile != null)
+                    Debug.Log($"[ProfileManager] Step 2 result — profile created: {profile.DisplayName}");
+                else
+                    Debug.LogError("[ProfileManager] Step 2 result — create failed. See BackendClient logs above.");
             }
 
             if (profile == null)
             {
-                Debug.LogError("[ProfileManager] Failed to load or create profile — check BackendClient logs above for HTTP response details.");
+                Debug.LogError("[ProfileManager] Both GET and POST failed — cannot continue.");
                 return false;
             }
 
-            Debug.Log($"[ProfileManager] Profile ready: {profile.DisplayName}");
-
             ActiveProfile = profile;
-
-            // Feed name into existing Phase 2 identity chain —
-            // PlayerIdentity, ChatUI, and PlayerPresenceManager all read from here.
+            Debug.Log($"[ProfileManager] Step 3 — SessionManager.SignIn({profile.DisplayName})");
             SessionManager.Instance.SignIn(profile.DisplayName);
 
-            // Fire-and-forget last login timestamp update
+            Debug.Log("[ProfileManager] Step 4 — profile chain complete, Boot scene will load.");
             _ = BackendClient.Instance.UpdateLastLoginAsync(userId);
 
             return true;

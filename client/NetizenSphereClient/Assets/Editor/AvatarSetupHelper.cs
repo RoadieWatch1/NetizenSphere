@@ -13,8 +13,14 @@ namespace NetizenSphere.Editor
     // ──────────────────────────────────────────────────────────────────────────
     public class AvatarAutoSetup : AssetPostprocessor
     {
-        private const string ModelPath  = "Assets/Characters/Ch20_nonPBR.fbx";
         private const string PrefabPath = "Assets/Resources/Player.prefab";
+
+        // Watched models — add new Mixamo characters here to auto-wire on import
+        private static readonly string[] WatchedModels = new[]
+        {
+            "Assets/Characters/DefaultMale.fbx",
+            "Assets/Characters/Ch20_nonPBR.fbx"
+        };
 
         static void OnPostprocessAllAssets(
             string[] importedAssets, string[] deletedAssets,
@@ -22,18 +28,17 @@ namespace NetizenSphere.Editor
         {
             foreach (var path in importedAssets)
             {
-                if (path == ModelPath)
+                foreach (var watched in WatchedModels)
                 {
-                    // Delay one frame so the Avatar is fully registered
-                    EditorApplication.delayCall += AutoWirePlayer;
-                    break;
+                    if (path == watched)
+                    {
+                        string captured = path;
+                        EditorApplication.delayCall += () =>
+                            AvatarSetupHelper.WirePlayerPrefab(captured, PrefabPath, silent: true);
+                        return;
+                    }
                 }
             }
-        }
-
-        static void AutoWirePlayer()
-        {
-            AvatarSetupHelper.WirePlayerPrefab(ModelPath, PrefabPath, silent: true);
         }
     }
 

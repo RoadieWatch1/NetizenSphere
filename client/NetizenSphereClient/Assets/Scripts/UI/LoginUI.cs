@@ -61,19 +61,19 @@ namespace NetizenSphere.UI
             _state = LoginState.Loading;
             try
             {
+                // Pre-fill email from last successful login (password is never stored)
+                _emailInput = PlayerPrefs.GetString("NS_LastEmail", "");
+
                 bool restored = await AuthService.Instance.RestoreSessionAsync();
                 if (restored && ProfileManager.Instance != null)
                 {
                     bool ok = await ProfileManager.Instance.LoadOrCreateProfileAsync(
                         AuthService.Instance.UserId, "");
                     if (ok)
-                    {
-                        // Pre-fill display name field so user can see/edit it on next login
                         _nameInput = ProfileManager.Instance.ActiveProfile?.DisplayName ?? "";
-                        StartCoroutine(FadeAndLoad());
-                        return;
-                    }
                 }
+                // Always stay on login screen — user must press SIGN IN to enter.
+                // This lets a different user sign in on the same machine.
             }
             catch (Exception e)
             {
@@ -81,8 +81,7 @@ namespace NetizenSphere.UI
             }
             finally
             {
-                if (_state == LoginState.Loading)
-                    _state = LoginState.Idle;
+                _state = LoginState.Idle;
             }
         }
 
@@ -261,6 +260,10 @@ namespace NetizenSphere.UI
                     return;
                 }
 
+                // Remember email for next launch pre-fill (password never stored)
+                PlayerPrefs.SetString("NS_LastEmail", email);
+                PlayerPrefs.Save();
+
                 // If user entered a different name than what's stored, update it.
                 var active = ProfileManager.Instance.ActiveProfile;
                 if (active != null
@@ -316,6 +319,10 @@ namespace NetizenSphere.UI
                     _state    = LoginState.Idle;
                     return;
                 }
+
+                // Remember email for next launch pre-fill
+                PlayerPrefs.SetString("NS_LastEmail", email);
+                PlayerPrefs.Save();
 
                 _state = LoginState.FadingOut;
                 StartCoroutine(FadeAndLoad());

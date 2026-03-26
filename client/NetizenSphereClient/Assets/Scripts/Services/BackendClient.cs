@@ -54,7 +54,7 @@ namespace NetizenSphere.Services
             if (req.result != UnityWebRequest.Result.Success)
                 return null;
 
-            var rows = ParseArray<ProfileRow>(req.downloadHandler.text);
+            var rows = ParseProfileArray(req.downloadHandler.text);
             return rows.Length == 0 ? null : ToUserProfile(rows[0]);
         }
 
@@ -209,18 +209,20 @@ namespace NetizenSphere.Services
                 + "}";
         }
 
-        private static T[] ParseArray<T>(string json)
+        private static ProfileRow[] ParseProfileArray(string json)
         {
-            if (string.IsNullOrEmpty(json) || json == "[]") return Array.Empty<T>();
+            if (string.IsNullOrEmpty(json) || json.Trim() == "[]") return Array.Empty<ProfileRow>();
             try
             {
                 string wrapped = "{\"items\":" + json + "}";
-                return JsonUtility.FromJson<ArrayWrapper<T>>(wrapped)?.items ?? Array.Empty<T>();
+                var result = JsonUtility.FromJson<ProfileRowArray>(wrapped);
+                Debug.Log($"[BackendClient] ParseProfileArray parsed {result?.items?.Length ?? 0} row(s)");
+                return result?.items ?? Array.Empty<ProfileRow>();
             }
             catch (Exception e)
             {
-                Debug.LogWarning($"[BackendClient] ParseArray failed: {e.Message} | json: {json}");
-                return Array.Empty<T>();
+                Debug.LogWarning($"[BackendClient] ParseProfileArray failed: {e.Message} | json: {json}");
+                return Array.Empty<ProfileRow>();
             }
         }
 
@@ -246,7 +248,7 @@ namespace NetizenSphere.Services
 
         // ── Wire types ────────────────────────────────────────────────────────────
 
-        [Serializable] private class ArrayWrapper<T> { public T[] items; }
+        [Serializable] private class ProfileRowArray { public ProfileRow[] items; }
 
         [Serializable]
         private class ProfileRow
