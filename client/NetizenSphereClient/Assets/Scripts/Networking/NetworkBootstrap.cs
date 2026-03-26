@@ -19,7 +19,10 @@ namespace NetizenSphere.Networking
 
             NetworkManager.Singleton.NetworkConfig.NetworkTransport = transport;
 
-            _nameInput = PlayerPrefs.GetString("DisplayName", "");
+            // Load saved name — but only if it was explicitly set by the user,
+            // not a randomly generated Netizen#### fallback.
+            string saved = PlayerPrefs.GetString("DisplayName", "");
+            _nameInput = saved.StartsWith("Netizen") ? "" : saved;
         }
 
         private void OnGUI()
