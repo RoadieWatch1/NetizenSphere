@@ -22,6 +22,8 @@ namespace NetizenSphere.Core
             Instance = this;
             DontDestroyOnLoad(gameObject);
 
+            Screen.SetResolution(960, 540, FullScreenMode.Windowed);
+
             _playerPrefab = Resources.Load<GameObject>("Player");
 
             if (_playerPrefab == null)
