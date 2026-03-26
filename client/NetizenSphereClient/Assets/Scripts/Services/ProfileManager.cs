@@ -6,8 +6,9 @@ namespace NetizenSphere.Services
 {
     /// <summary>
     /// Loads or creates a Supabase profile after auth completes.
-    /// Caches the active profile at runtime and feeds DisplayName into SessionManager
-    /// so all existing Phase 2 identity code continues to work unchanged.
+    /// Caches the active profile at runtime and applies it to SessionManager as the
+    /// full authenticated identity (Phase 3), which also feeds DisplayName into the
+    /// Phase 2 chain so all existing systems continue to work unchanged.
     /// </summary>
     public class ProfileManager : MonoBehaviour
     {
@@ -38,8 +39,8 @@ namespace NetizenSphere.Services
         /// <summary>
         /// Fetches the profile for <paramref name="userId"/> from Supabase.
         /// If no profile exists, creates one with <paramref name="fallbackDisplayName"/>.
-        /// Feeds the resulting display name into SessionManager so Phase 2 code
-        /// picks it up automatically.
+        /// Sets ActiveProfile and applies the full profile to SessionManager so both the
+        /// Phase 3 authenticated identity and the Phase 2 display name chain are updated.
         /// </summary>
         public async Task<bool> LoadOrCreateProfileAsync(string userId, string fallbackDisplayName)
         {
@@ -77,8 +78,8 @@ namespace NetizenSphere.Services
             }
 
             ActiveProfile = profile;
-            Debug.Log($"[ProfileManager] Step 3 — SessionManager.SignIn({profile.DisplayName})");
-            SessionManager.Instance.SignIn(profile.DisplayName);
+            Debug.Log($"[ProfileManager] Step 3 — applying full authenticated profile to SessionManager (userId={profile.UserId} | displayName={profile.DisplayName})");
+            SessionManager.Instance.ApplyAuthenticatedProfile(profile);
 
             Debug.Log("[ProfileManager] Step 4 — profile chain complete, Boot scene will load.");
             _ = BackendClient.Instance.UpdateLastLoginAsync(userId);
@@ -87,7 +88,7 @@ namespace NetizenSphere.Services
         }
 
         /// <summary>
-        /// Updates the display name on the backend and keeps SessionManager in sync.
+        /// Updates the display name on the backend, in the local cache, and in SessionManager.
         /// </summary>
         public async Task<bool> UpdateDisplayNameAsync(string newName)
         {
@@ -98,12 +99,15 @@ namespace NetizenSphere.Services
             if (!ok) return false;
 
             ActiveProfile.DisplayName = sanitized;
-            SessionManager.Instance.SignIn(sanitized);
+
+            // Keep authenticated state in sync — update both Phase 3 fields and Phase 2 chain.
+            SessionManager.Instance.ApplyAuthenticatedProfile(ActiveProfile);
             return true;
         }
 
         /// <summary>
         /// Updates avatar customization fields on the backend and in the local cache.
+        /// Re-applies the updated profile to SessionManager so avatar config stays current.
         /// </summary>
         public async Task<bool> UpdateAvatarAsync(string primaryColor, string accentColor, string preset)
         {
@@ -117,7 +121,20 @@ namespace NetizenSphere.Services
             ActiveProfile.AvatarPrimaryColor = primaryColor;
             ActiveProfile.AvatarAccentColor  = accentColor;
             ActiveProfile.AvatarPreset        = preset;
+
+            // Keep SessionManager avatar config in sync.
+            SessionManager.Instance.ApplyAuthenticatedProfile(ActiveProfile);
             return true;
+        }
+
+        /// <summary>
+        /// Clears the active profile on logout or session loss.
+        /// Called by AuthService.SignOut() as part of the full logout chain.
+        /// </summary>
+        public void ClearActiveProfile()
+        {
+            Debug.Log("[ProfileManager] Active profile cleared.");
+            ActiveProfile = null;
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────────

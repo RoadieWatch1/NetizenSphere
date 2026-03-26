@@ -102,14 +102,20 @@ namespace NetizenSphere.Services
         }
 
         /// <summary>
-        /// Clears auth state and removes the saved refresh token.
+        /// Full logout chain: clears Supabase auth state, then cascades to
+        /// ProfileManager and SessionManager so all runtime identity is reset.
         /// </summary>
         public void SignOut()
         {
+            Debug.Log("[AuthService] Signing out — clearing auth, profile, and session state.");
+
             IsAuthenticated = false;
             UserId          = null;
             AccessToken     = null;
             ClearSavedSession();
+
+            ProfileManager.Instance?.ClearActiveProfile();
+            SessionManager.Instance?.ClearAuthenticatedState();
         }
 
         // ── Internal ──────────────────────────────────────────────────────────────
