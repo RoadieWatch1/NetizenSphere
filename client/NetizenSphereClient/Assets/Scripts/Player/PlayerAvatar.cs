@@ -31,11 +31,30 @@ namespace NetizenSphere.Player
                 return;
             }
 
-            // ── 2. Assign controller if needed ───────────────────────────────
-            // Prefer the serialized field; if absent, leave whatever the Animator
-            // already has from its own serialized m_Controller reference.
-            if (_animatorController != null && _animator.runtimeAnimatorController == null)
+            // ── 2. Assign controller ──────────────────────────────────────────
+            // Always apply the serialized _animatorController when set — this
+            // overrides whatever m_Controller resolved to (or didn't) at load time,
+            // which guards against stale deserialization after an FBX re-import.
+            if (_animatorController != null)
                 _animator.runtimeAnimatorController = _animatorController;
+
+#if UNITY_EDITOR
+            // Editor-only safety net: if both the serialized field AND the Animator's
+            // own m_Controller reference are null (e.g., a failed auto-setup pass),
+            // load the controller directly from its known asset path so Play mode works.
+            if (_animator.runtimeAnimatorController == null)
+            {
+                const string ControllerPath = "Assets/Animations/PlayerAnimatorController.controller";
+                var fallback = UnityEditor.AssetDatabase
+                    .LoadAssetAtPath<RuntimeAnimatorController>(ControllerPath);
+                if (fallback != null)
+                {
+                    _animator.runtimeAnimatorController = fallback;
+                    Debug.LogWarning("[PlayerAvatar] Controller loaded via AssetDatabase fallback. " +
+                        "Run NetizenSphere > Setup Avatar to permanently wire the prefab.", this);
+                }
+            }
+#endif
 
             // ── 3. Validate ──────────────────────────────────────────────────
             if (_animator.runtimeAnimatorController == null && !_reportedInvalid)
