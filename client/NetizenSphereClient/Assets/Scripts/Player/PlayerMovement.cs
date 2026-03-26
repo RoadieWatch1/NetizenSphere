@@ -91,11 +91,20 @@ namespace NetizenSphere.Player
         {
             if (groundCheck == null)
             {
-                Debug.LogWarning("Ground Check is not assigned on PlayerMovement.", this);
-                return;
+                // Fall back to CharacterController built-in grounding when the
+                // child transform isn't wired.
+                _isGrounded = _characterController.isGrounded;
             }
-
-            _isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+            else if (groundMask == 0)
+            {
+                // groundMask left at default Nothing — Physics.CheckSphere would
+                // never hit any layer. Use CharacterController.isGrounded instead.
+                _isGrounded = _characterController.isGrounded;
+            }
+            else
+            {
+                _isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+            }
 
             if (_isGrounded && _velocity.y < 0f)
             {
