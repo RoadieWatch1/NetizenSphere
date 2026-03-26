@@ -8,7 +8,9 @@ namespace NetizenSphere.Player
 
         private void Awake()
         {
-            _animator = GetComponent<Animator>();
+            // Search self first, then children — supports Animator on AvatarVisual
+            // OR on the humanoid model root when it's parented under AvatarVisual.
+            _animator = GetComponent<Animator>() ?? GetComponentInChildren<Animator>(true);
         }
 
         public void SetSpeed(float speed)
