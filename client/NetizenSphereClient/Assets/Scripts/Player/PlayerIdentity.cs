@@ -1,5 +1,6 @@
 using Unity.Collections;
 using Unity.Netcode;
+using NetizenSphere.Services;
 using UnityEngine;
 
 namespace NetizenSphere.Player
@@ -66,6 +67,16 @@ namespace NetizenSphere.Player
 
         private string GetLocalDisplayName()
         {
+            if (SessionManager.Instance != null && SessionManager.Instance.IsSignedIn)
+            {
+                string sessionName = SessionManager.Instance.DisplayName;
+
+                if (!string.IsNullOrWhiteSpace(sessionName))
+                {
+                    return sessionName.Trim();
+                }
+            }
+
             string savedName = PlayerPrefs.GetString("DisplayName", string.Empty);
 
             if (string.IsNullOrWhiteSpace(savedName))
@@ -75,7 +86,7 @@ namespace NetizenSphere.Player
                 PlayerPrefs.Save();
             }
 
-            return savedName;
+            return savedName.Trim();
         }
 
         [ServerRpc]
