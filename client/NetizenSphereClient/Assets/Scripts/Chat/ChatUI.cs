@@ -1,5 +1,6 @@
 using NetizenSphere.Player;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace NetizenSphere.Chat
 {
@@ -15,7 +16,7 @@ namespace NetizenSphere.Chat
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Return) && !string.IsNullOrWhiteSpace(_input))
+            if (Keyboard.current != null && Keyboard.current.enterKey.wasPressedThisFrame && !string.IsNullOrWhiteSpace(_input))
                 Submit();
         }
 
