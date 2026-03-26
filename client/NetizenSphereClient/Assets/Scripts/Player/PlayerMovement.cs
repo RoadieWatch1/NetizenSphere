@@ -64,7 +64,7 @@ namespace NetizenSphere.Player
             }
         }
 
-        protected override void OnDestroy()
+        public override void OnDestroy()
         {
             _playerControls.Disable();
             _playerControls.Dispose();
