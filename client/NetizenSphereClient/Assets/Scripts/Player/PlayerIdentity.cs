@@ -12,11 +12,55 @@ namespace NetizenSphere.Player
             NetworkVariableWritePermission.Server
         );
 
+        [SerializeField] private GameObject nameplatePrefab;
+
+        private PlayerNameplate _nameplateInstance;
+
         public override void OnNetworkSpawn()
         {
             if (IsOwner)
             {
                 SubmitDisplayNameServerRpc(GetLocalDisplayName());
+            }
+
+            CreateNameplate();
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            DisplayName.OnValueChanged -= OnNameChanged;
+
+            if (_nameplateInstance != null)
+            {
+                Destroy(_nameplateInstance.gameObject);
+            }
+        }
+
+        private void CreateNameplate()
+        {
+            if (nameplatePrefab == null)
+            {
+                Debug.LogWarning("PlayerIdentity: nameplatePrefab not assigned.", this);
+                return;
+            }
+
+            GameObject instance = Instantiate(nameplatePrefab);
+            _nameplateInstance = instance.GetComponent<PlayerNameplate>();
+
+            if (_nameplateInstance != null)
+            {
+                _nameplateInstance.SetTarget(transform);
+                _nameplateInstance.SetName(DisplayName.Value.ToString());
+            }
+
+            DisplayName.OnValueChanged += OnNameChanged;
+        }
+
+        private void OnNameChanged(FixedString64Bytes oldName, FixedString64Bytes newName)
+        {
+            if (_nameplateInstance != null)
+            {
+                _nameplateInstance.SetName(newName.ToString());
             }
         }
 
@@ -38,16 +82,12 @@ namespace NetizenSphere.Player
         private void SubmitDisplayNameServerRpc(string newName)
         {
             if (string.IsNullOrWhiteSpace(newName))
-            {
                 return;
-            }
 
             string trimmedName = newName.Trim();
 
             if (trimmedName.Length > 24)
-            {
                 trimmedName = trimmedName.Substring(0, 24);
-            }
 
             DisplayName.Value = trimmedName;
         }

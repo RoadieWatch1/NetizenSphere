@@ -179,6 +179,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69added8879e140289fbca1f3a926611, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::NetizenSphere.Player.PlayerIdentity
+  nameplatePrefab: {fileID: 9000000000000001001, guid: b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7, type: 3}
 --- !u!1 &7364829103847561007
 GameObject:
   m_ObjectHideFlags: 0
