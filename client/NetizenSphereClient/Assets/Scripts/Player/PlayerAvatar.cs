@@ -2,6 +2,9 @@ using UnityEngine;
 
 namespace NetizenSphere.Player
 {
+    // Run well before NGO components (default order 0) so the controller
+    // is assigned before NetworkAnimator.Awake() calls m_Animator.layerCount.
+    [DefaultExecutionOrder(-500)]
     public class PlayerAvatar : MonoBehaviour
     {
         [SerializeField] private RuntimeAnimatorController _animatorController;
@@ -12,10 +15,10 @@ namespace NetizenSphere.Player
         {
             _animator = GetComponent<Animator>();
 
-            // Assign controller via code — more reliable than the serialized YAML
-            // reference on the Animator component itself.
             if (_animatorController != null)
                 _animator.runtimeAnimatorController = _animatorController;
+            else
+                Debug.LogError("[PlayerAvatar] _animatorController is not assigned in the prefab!", this);
 
             // Ch20 (and any imported FBX model) ships with its own Animator component.
             // That child Animator has no controller and takes priority over AvatarVisual's
