@@ -7,62 +7,71 @@ namespace NetizenSphere.Player
     [DefaultExecutionOrder(-500)]
     public class PlayerAvatar : MonoBehaviour
     {
+        // Pre-wire both fields via AvatarSetupHelper (NetizenSphere > Setup Avatar).
+        // If left null they fall back to auto-discovery so the component still works
+        // even when the prefab hasn't been through setup yet.
+        [SerializeField] private Animator _animator;
         [SerializeField] private RuntimeAnimatorController _animatorController;
 
-        private Animator _animator;
+        private bool _reportedInvalid;
 
         private void Awake()
         {
-            // Look on this GO first, then fall back to any child (handles unusual prefab layouts).
-            _animator = GetComponent<Animator>();
+            // ── 1. Find the Animator ─────────────────────────────────────────
+            if (_animator == null)
+                _animator = GetComponent<Animator>();
+
             if (_animator == null)
                 _animator = GetComponentInChildren<Animator>(true);
 
             if (_animator == null)
             {
-                Debug.LogError("[PlayerAvatar] No Animator found on this GameObject or its children.", this);
+                Debug.LogError("[PlayerAvatar] No Animator found. " +
+                    "Run NetizenSphere > Setup Avatar to wire the prefab.", this);
                 return;
             }
 
-            // Prefer the explicitly-assigned controller; if none, keep whatever
-            // was wired at edit time (AvatarSetupHelper sets it on the Animator directly).
-            if (_animatorController != null)
-            {
+            // ── 2. Assign controller if needed ───────────────────────────────
+            // Prefer the serialized field; if absent, leave whatever the Animator
+            // already has from its own serialized m_Controller reference.
+            if (_animatorController != null && _animator.runtimeAnimatorController == null)
                 _animator.runtimeAnimatorController = _animatorController;
-            }
-            else if (_animator.runtimeAnimatorController == null)
+
+            // ── 3. Validate ──────────────────────────────────────────────────
+            if (_animator.runtimeAnimatorController == null && !_reportedInvalid)
             {
-                Debug.LogError("[PlayerAvatar] No AnimatorController available. " +
-                    "Assign _animatorController in the prefab or run NetizenSphere > Setup Avatar.", this);
+                _reportedInvalid = true;
+                Debug.LogError("[PlayerAvatar] Animator has no controller. " +
+                    "Run NetizenSphere > Setup Avatar to wire the prefab.", this);
+            }
+            else
+            {
+                Debug.Log($"[PlayerAvatar] Ready — Animator: '{_animator.gameObject.name}' | " +
+                    $"Controller: '{_animator.runtimeAnimatorController?.name}' | " +
+                    $"Avatar: '{_animator.avatar?.name}'", this);
             }
 
-            Debug.Log($"[PlayerAvatar] Animator on '{_animator.gameObject.name}' | " +
-                $"Controller: {_animator.runtimeAnimatorController?.name ?? "NONE"} | " +
-                $"Avatar: {_animator.avatar?.name ?? "NONE"}", this);
-
-            // FBX models ship with their own controllerless Animator that fights ours.
-            // Disable every child Animator — only this GO's Animator drives the rig.
+            // ── 4. Silence competing child Animators ─────────────────────────
+            // FBX models ship with their own controller-less Animator that fights ours.
             foreach (var child in GetComponentsInChildren<Animator>(true))
             {
-                if (child.gameObject != gameObject)
+                if (child != _animator)
                     child.enabled = false;
             }
         }
 
-        private bool HasValidAnimator()
-        {
-            return _animator != null && _animator.runtimeAnimatorController != null;
-        }
+        private bool IsReady() =>
+            _animator != null && _animator.runtimeAnimatorController != null;
 
         public void SetSpeed(float speed)
         {
-            if (!HasValidAnimator()) return;
+            if (!IsReady()) return;
             _animator.SetFloat("Speed", speed);
         }
 
         public void SetGrounded(bool grounded)
         {
-            if (!HasValidAnimator()) return;
+            if (!IsReady()) return;
             _animator.SetBool("IsGrounded", grounded);
         }
 

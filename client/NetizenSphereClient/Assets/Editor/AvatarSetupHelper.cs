@@ -9,11 +9,11 @@ using UnityEngine;
 namespace NetizenSphere.Editor
 {
     // ──────────────────────────────────────────────────────────────────────────
-    // Auto-setup: fires once when DefaultMale.fbx is first imported
+    // Auto-setup: fires when Ch20_nonPBR.fbx or DefaultMale.fbx is first imported
     // ──────────────────────────────────────────────────────────────────────────
     public class AvatarAutoSetup : AssetPostprocessor
     {
-        private const string ModelPath  = "Assets/Characters/DefaultMale.fbx";
+        private const string ModelPath  = "Assets/Characters/Ch20_nonPBR.fbx";
         private const string PrefabPath = "Assets/Resources/Player.prefab";
 
         static void OnPostprocessAllAssets(
@@ -140,18 +140,22 @@ namespace NetizenSphere.Editor
             if (modelInstance.TryGetComponent<Animator>(out var modelAnim))
                 Object.DestroyImmediate(modelAnim);
 
-            // Wire PlayerAvatar._animatorController so Awake() can assign it at runtime.
-            // Without this the serialized field stays null and NetworkAnimator sees a
-            // controller-less Animator on the first frame.
+            // Wire PlayerAvatar serialized fields so Awake() never has to auto-discover.
             var playerAvatar = avatarVisual.GetComponent<NetizenSphere.Player.PlayerAvatar>();
-            if (playerAvatar != null && controller != null)
+            if (playerAvatar != null)
             {
                 var so = new SerializedObject(playerAvatar);
-                so.FindProperty("_animatorController").objectReferenceValue = controller;
+                // _animator → the Animator on AvatarVisual (same GO)
+                so.FindProperty("_animator").objectReferenceValue = animator;
+                // _animatorController → assigned only when the asset was found
+                if (controller != null)
+                    so.FindProperty("_animatorController").objectReferenceValue = controller;
                 so.ApplyModifiedPropertiesWithoutUndo();
             }
 
-            Debug.Log($"[AvatarSetup] {modelAsset.name} wired into Player.prefab.");
+            Debug.Log($"[AvatarSetup] Done — model: {modelAsset.name} | " +
+                $"controller: {animator.runtimeAnimatorController?.name ?? "NOT FOUND"} | " +
+                $"avatar: {animator.avatar?.name ?? "NOT FOUND"}");
             return true;
         }
     }
