@@ -6,8 +6,6 @@ namespace NetizenSphere.Networking
 {
     public class NetworkBootstrap : MonoBehaviour
     {
-        private string _nameInput = "";
-
         private void Awake()
         {
             var transport = GetComponent<UnityTransport>();
@@ -18,11 +16,6 @@ namespace NetizenSphere.Networking
             }
 
             NetworkManager.Singleton.NetworkConfig.NetworkTransport = transport;
-
-            // Load saved name — but only if it was explicitly set by the user,
-            // not a randomly generated Netizen#### fallback.
-            string saved = PlayerPrefs.GetString("DisplayName", "");
-            _nameInput = saved.StartsWith("Netizen") ? "" : saved;
         }
 
         private void OnGUI()
@@ -30,30 +23,13 @@ namespace NetizenSphere.Networking
             if (NetworkManager.Singleton == null)
                 return;
 
-            GUILayout.BeginArea(new Rect(10, 10, 220, 140));
+            GUILayout.BeginArea(new Rect(10, 10, 220, 100));
 
             if (!NetworkManager.Singleton.IsClient && !NetworkManager.Singleton.IsServer)
             {
-                GUILayout.Label("Display Name:");
-                _nameInput = GUILayout.TextField(_nameInput, 24, GUILayout.Width(200));
-
-                if (GUILayout.Button("Host"))
-                {
-                    SaveName();
-                    NetworkManager.Singleton.StartHost();
-                }
-
-                if (GUILayout.Button("Client"))
-                {
-                    SaveName();
-                    NetworkManager.Singleton.StartClient();
-                }
-
-                if (GUILayout.Button("Server"))
-                {
-                    SaveName();
-                    NetworkManager.Singleton.StartServer();
-                }
+                if (GUILayout.Button("Host"))   NetworkManager.Singleton.StartHost();
+                if (GUILayout.Button("Client")) NetworkManager.Singleton.StartClient();
+                if (GUILayout.Button("Server")) NetworkManager.Singleton.StartServer();
             }
             else
             {
@@ -63,16 +39,6 @@ namespace NetizenSphere.Networking
             }
 
             GUILayout.EndArea();
-        }
-
-        private void SaveName()
-        {
-            string name = _nameInput.Trim();
-            if (string.IsNullOrWhiteSpace(name))
-                return;
-
-            PlayerPrefs.SetString("DisplayName", name);
-            PlayerPrefs.Save();
         }
     }
 }
