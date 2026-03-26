@@ -21,9 +21,11 @@ namespace NetizenSphere.UI
         {
             float w = 300f;
             float x = (Screen.width - w) / 2f;
-            float y = Screen.height / 2f - 60f;
+            float y = Screen.height / 2f - 80f;
 
-            GUILayout.BeginArea(new Rect(x, y, w, 160f));
+            GUILayout.BeginArea(new Rect(x, y, w, 180f));
+            GUILayout.Label("NetizenSphere", GUI.skin.box);
+            GUILayout.Space(8f);
             GUILayout.Label("Display Name:");
             _nameInput = GUILayout.TextField(_nameInput, 24, GUILayout.Width(280f));
 
