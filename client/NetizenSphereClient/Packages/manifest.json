@@ -1,12 +1,16 @@
 {
   "dependencies": {
     "com.unity.collab-proxy": "2.11.4",
-    "com.unity.netcode.gameobjects": "2.6.0",
-    "com.unity.transport": "2.7.1",
+    "com.unity.entities": "6.4.0",
+    "com.unity.entities.graphics": "6.4.0",
     "com.unity.feature.development": "1.0.2",
+    "com.unity.feature.worldbuilding": "1.0.1",
     "com.unity.inputsystem": "1.19.0",
     "com.unity.multiplayer.center": "1.0.1",
+    "com.unity.netcode.gameobjects": "2.6.0",
+    "com.unity.physics": "1.4.5",
     "com.unity.timeline": "1.8.11",
+    "com.unity.transport": "2.7.1",
     "com.unity.ugui": "2.0.0",
     "com.unity.visualscripting": "1.9.10",
     "com.unity.modules.accessibility": "1.0.0",
