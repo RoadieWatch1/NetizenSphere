@@ -13,17 +13,35 @@ namespace NetizenSphere.Player
 
         private void Awake()
         {
+            // Look on this GO first, then fall back to any child (handles unusual prefab layouts).
             _animator = GetComponent<Animator>();
+            if (_animator == null)
+                _animator = GetComponentInChildren<Animator>(true);
 
+            if (_animator == null)
+            {
+                Debug.LogError("[PlayerAvatar] No Animator found on this GameObject or its children.", this);
+                return;
+            }
+
+            // Prefer the explicitly-assigned controller; if none, keep whatever
+            // was wired at edit time (AvatarSetupHelper sets it on the Animator directly).
             if (_animatorController != null)
+            {
                 _animator.runtimeAnimatorController = _animatorController;
-            else
-                Debug.LogError("[PlayerAvatar] _animatorController is not assigned in the prefab!", this);
+            }
+            else if (_animator.runtimeAnimatorController == null)
+            {
+                Debug.LogError("[PlayerAvatar] No AnimatorController available. " +
+                    "Assign _animatorController in the prefab or run NetizenSphere > Setup Avatar.", this);
+            }
 
-            // Ch20 (and any imported FBX model) ships with its own Animator component.
-            // That child Animator has no controller and takes priority over AvatarVisual's
-            // Animator for its own bones, causing a permanent T-pose. Disable all child
-            // Animators so only the one on this GameObject (AvatarVisual) drives the rig.
+            Debug.Log($"[PlayerAvatar] Animator on '{_animator.gameObject.name}' | " +
+                $"Controller: {_animator.runtimeAnimatorController?.name ?? "NONE"} | " +
+                $"Avatar: {_animator.avatar?.name ?? "NONE"}", this);
+
+            // FBX models ship with their own controllerless Animator that fights ours.
+            // Disable every child Animator — only this GO's Animator drives the rig.
             foreach (var child in GetComponentsInChildren<Animator>(true))
             {
                 if (child.gameObject != gameObject)
@@ -31,16 +49,21 @@ namespace NetizenSphere.Player
             }
         }
 
+        private bool HasValidAnimator()
+        {
+            return _animator != null && _animator.runtimeAnimatorController != null;
+        }
+
         public void SetSpeed(float speed)
         {
-            if (_animator != null)
-                _animator.SetFloat("Speed", speed);
+            if (!HasValidAnimator()) return;
+            _animator.SetFloat("Speed", speed);
         }
 
         public void SetGrounded(bool grounded)
         {
-            if (_animator != null)
-                _animator.SetBool("IsGrounded", grounded);
+            if (!HasValidAnimator()) return;
+            _animator.SetBool("IsGrounded", grounded);
         }
 
         // Rotates AvatarVisual to face the direction of travel.

@@ -27,6 +27,11 @@ namespace NetizenSphere.Editor
 
         private static void OpenHubScene()
         {
+            // Always set Play Mode to start from Login so pressing Play doesn't skip the login screen
+            var loginScene = AssetDatabase.LoadAssetAtPath<SceneAsset>("Assets/Scenes/Login.unity");
+            if (loginScene != null)
+                EditorSceneManager.playModeStartScene = loginScene;
+
             var currentScene = EditorSceneManager.GetActiveScene();
 
             // Already on Boot — nothing to do
@@ -41,7 +46,7 @@ namespace NetizenSphere.Editor
             }
 
             EditorSceneManager.OpenScene(BootScenePath);
-            UnityEngine.Debug.Log("[NetizenSphere] Opened Boot.unity (hub world) in Scene view.");
+            UnityEngine.Debug.Log("[NetizenSphere] Opened Boot.unity (hub world) in Scene view. Play Mode start scene set to Login.unity.");
         }
 
         [MenuItem("NetizenSphere/Open Hub Scene")]

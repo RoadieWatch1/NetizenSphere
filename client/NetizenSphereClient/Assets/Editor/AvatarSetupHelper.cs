@@ -140,6 +140,17 @@ namespace NetizenSphere.Editor
             if (modelInstance.TryGetComponent<Animator>(out var modelAnim))
                 Object.DestroyImmediate(modelAnim);
 
+            // Wire PlayerAvatar._animatorController so Awake() can assign it at runtime.
+            // Without this the serialized field stays null and NetworkAnimator sees a
+            // controller-less Animator on the first frame.
+            var playerAvatar = avatarVisual.GetComponent<NetizenSphere.Player.PlayerAvatar>();
+            if (playerAvatar != null && controller != null)
+            {
+                var so = new SerializedObject(playerAvatar);
+                so.FindProperty("_animatorController").objectReferenceValue = controller;
+                so.ApplyModifiedPropertiesWithoutUndo();
+            }
+
             Debug.Log($"[AvatarSetup] {modelAsset.name} wired into Player.prefab.");
             return true;
         }
